@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador ICFES TecnoEmpresarial • Pruebas Saber Ciencia y Tecnología</title>
+  <meta name="description" content="Simulador oficial interactivo de pruebas Saber ICFES en Ciencia, Tecnología y Gestión Empresarial. Incluye hoja óptica OMR, modo estudio con justificaciones y cálculo de puntaje 0-500.">
+  <meta name="theme-color" content="#0A1128">
+
+  <!-- Open Graph / Meta Social -->
+  <meta property="og:title" content="Simulador ICFES TecnoEmpresarial • Saber Ciencia y Tecnología">
+  <meta property="og:description" content="Entrénate con 40 preguntas tipo ICFES, hoja de respuestas OMR, modo estudio con retroalimentación instantánea y cálculo de percentiles.">
+  <meta property="og:type" content="website">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            body: ['"Inter"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            darkbase: '#090d16',
+            darksurface: '#0f172a',
+            darkcard: '#131d33',
+            brand: {
+              navy: '#0B132B',
+              slate: '#1C2541',
+              blue: '#1D4ED8',
+              sky: '#0284C7',
+              cyan: '#06B6D4',
+              accent: '#3B82F6',
+              light: '#F8FAFC',
+              sheet: '#F1F5F9'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-slate-100 dark:bg-[#090d16] text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col grid-bg antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
+
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top App Navigation / ICFES Institutional Header -->
+  <header class="sticky top-0 z-40 bg-[#0A1128] dark:bg-[#060a12] text-white border-b border-cyan-900/40 dark:border-cyan-800/40 shadow-lg backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand & Exam Title -->
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-700 via-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
+          <i class="fa-solid fa-atom text-white text-lg animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-sm sm:text-base tracking-wide bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-transparent">
+              SIMULADOR SABER • ICFES TECH
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/80 font-bold tracking-wider">
+              VERSIÓN 2025.2
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">
+            Materia: <span class="text-cyan-300 font-semibold">Ciencia y Tecnología</span> • Gestión, Costos, Leyes y Operaciones
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls & Quick Stats -->
+      <div class="flex items-center gap-2 sm:gap-4 lg:gap-5">
+        <!-- Timer with Pause Toggle -->
+        <div class="flex items-center gap-2 bg-slate-900/90 dark:bg-black/60 px-2.5 py-1.5 rounded-lg border border-slate-700 dark:border-slate-800 font-mono shadow-inner text-xs sm:text-sm">
+          <button onclick="window.app.toggleTimerPause()" class="text-cyan-400 hover:text-cyan-300 transition" title="Pausar / Reanudar cronómetro">
+            <i class="fa-regular fa-clock" id="timer-pause-icon"></i>
+          </button>
+          <span class="font-bold text-slate-200 tracking-wider" id="timer-display">02:40:00</span>
+        </div>
+
+        <!-- Sound Toggle Button -->
+        <button id="sound-toggle-btn" onclick="window.app.toggleSound()" class="p-2 rounded-xl text-xs bg-slate-900/90 dark:bg-slate-800 border border-slate-700 dark:border-slate-800 text-slate-300 hover:text-white transition shadow-sm" title="Efectos de sonido">
+          <i class="fa-solid fa-volume-high text-cyan-400 text-sm" id="sound-toggle-icon"></i>
+        </button>
+
+        <!-- Dark / Light Mode Toggle Button -->
+        <button id="theme-toggle-btn" onclick="window.app.toggleTheme()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-900/90 dark:bg-slate-800 border border-slate-700 dark:border-cyan-500/30 text-amber-300 dark:text-cyan-300 hover:text-white transition shadow-sm hover:border-cyan-400" title="Cambiar tema Día / Noche">
+          <i class="fa-solid fa-moon text-sm" id="theme-toggle-icon"></i>
+          <span class="hidden sm:inline" id="theme-toggle-text">Modo Noche</span>
+        </button>
+
+        <!-- Mode Toggle (Simulacro vs Estudio con Justificaciones) -->
+        <div class="flex items-center bg-slate-900/90 dark:bg-black/60 p-1 rounded-xl border border-slate-700 dark:border-slate-800 text-xs">
+          <button id="btn-mode-eval" onclick="window.app.setMode('eval')" class="px-3 py-1 rounded-lg font-medium transition text-white bg-blue-600 dark:bg-cyan-600 shadow-sm">
+            <i class="fa-solid fa-file-signature mr-1.5"></i>Simulacro
+          </button>
+          <button id="btn-mode-study" onclick="window.app.setMode('study')" class="px-3 py-1 rounded-lg font-medium transition text-slate-400 hover:text-white">
+            <i class="fa-solid fa-lightbulb mr-1.5 text-amber-400"></i>Modo Estudio
+          </button>
+        </div>
+
+        <!-- Global Score Trigger / Finish Button -->
+        <button onclick="window.app.openResultsModal()" class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs tracking-wide shadow-md shadow-emerald-900/20 border border-emerald-400/30 transition">
+          <i class="fa-solid fa-check-double"></i> Calificar Examen
+        </button>
+      </div>
+    </div>
+
+    <!-- Category / Block Tabs Bar -->
+    <div class="bg-[#0f172a] dark:bg-[#090d16] border-t border-slate-800 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 py-2 overflow-x-auto">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 min-w-max text-xs">
+        <span class="text-slate-400 font-mono uppercase text-[11px] mr-1 flex items-center gap-1">
+          <i class="fa-solid fa-layer-group text-cyan-400"></i> Bloques:
+        </span>
+        <button id="tab-block-1" onclick="window.app.filterBlock(1)" class="block-tab active px-3 py-1 rounded-lg font-medium border border-cyan-500 bg-cyan-950/80 text-cyan-300 transition shadow-sm">
+          1. Talento y Nómina (1-8)
+        </button>
+        <button id="tab-block-2" onclick="window.app.filterBlock(2)" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 transition">
+          2. Costos y Equilibrio (9-16)
+        </button>
+        <button id="tab-block-3" onclick="window.app.filterBlock(3)" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 transition">
+          3. Canales y DOFA (17-24)
+        </button>
+        <button id="tab-block-4" onclick="window.app.filterBlock(4)" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 transition">
+          4. Constitución Legal (25-30)
+        </button>
+        <button id="tab-block-5" onclick="window.app.filterBlock(5)" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 transition">
+          5. Principios Fayol (31-35)
+        </button>
+        <button id="tab-block-6" onclick="window.app.filterBlock(6)" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600 transition">
+          6. Tech &amp; Turismo (36-40)
+        </button>
+        <button id="tab-block-all" onclick="window.app.filterBlock('all')" class="block-tab px-3 py-1 rounded-lg font-medium border border-slate-700 bg-slate-800/80 text-slate-400 hover:text-white transition">
+          Ver Todas (40)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subheader Quick Banner / ICFES Official ID Strip -->
+  <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 dark:from-slate-950 dark:via-blue-950/70 dark:to-slate-950 text-white border-b border-blue-950 dark:border-cyan-900/30 py-2.5 px-4 sm:px-6">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between text-xs gap-3">
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-1.5 font-mono text-cyan-200">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>ESTUDIANTE REGISTRADO</span>
+        </div>
+        <div class="text-slate-300">
+          Cuadernillo: <span class="font-mono text-white font-bold bg-black/40 px-2 py-0.5 rounded border border-cyan-500/20">CIEN-TECH-01</span>
+        </div>
+        <div class="text-slate-300">
+          Total Preguntas: <span class="font-bold text-white">40</span> de Selección Múltiple con Única Respuesta
+        </div>
+      </div>
+
+      <!-- Quick Progress Bar -->
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <span class="text-slate-300">Progreso:</span>
+        <div class="w-36 h-2.5 bg-slate-800 dark:bg-slate-900 rounded-full overflow-hidden border border-slate-700 dark:border-slate-700">
+          <div id="top-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 shadow-sm shadow-cyan-400/50" style="width: 0%"></div>
+        </div>
+        <span id="answered-counter-badge" class="font-mono font-bold text-cyan-300">0/40</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace: Split Screen (Exam Booklet Left, Optical Answer Sheet Right) -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- LEFT COLUMN: Exam Question Reader (Cuadernillo de Preguntas) -->
+    <section class="lg:col-span-8 flex flex-col gap-5">
+
+      <!-- Active Block Header Card -->
+      <div id="block-info-card" class="bg-white dark:bg-[#131d33] rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden transition-colors">
+        <div class="absolute -right-10 -bottom-10 opacity-5 dark:opacity-10 pointer-events-none text-blue-900 dark:text-cyan-400">
+          <i class="fa-solid fa-graduation-cap text-9xl"></i>
+        </div>
+        <div class="flex items-start justify-between flex-wrap gap-3">
+          <div>
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold bg-blue-50 dark:bg-cyan-950/80 text-blue-700 dark:text-cyan-300 border border-blue-200 dark:border-cyan-800 uppercase mb-1.5">
+              <i class="fa-solid fa-microscope text-blue-600 dark:text-cyan-400"></i> Área de Evaluación
+            </div>
+            <h2 id="current-block-title" class="text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Bloque 1: Recursos Humanos, Análisis de Cargos y Nómina
+            </h2>
+            <p id="current-block-desc" class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              Evaluación de competencias operativas, cálculo de costos laborales y delimitación de funciones en la organización.
+            </p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-400 dark:text-slate-500 block font-mono">Preguntas del bloque</span>
+            <span id="current-block-range" class="text-lg font-extrabold text-slate-800 dark:text-cyan-400 font-mono">01 — 08</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Advanced Filters Panel -->
+      <div id="filter-controls-panel" class="bg-white dark:bg-[#131d33] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors space-y-4">
+        <!-- Top bar of the filter: search + results count + reset -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+          <!-- Keyword search box -->
+          <div class="relative flex-1 max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-xs"></i>
+            <input 
+              type="text" 
+              id="filter-search-input" 
+              oninput="window.app.onSearchInput(this.value)" 
+              placeholder="Buscar palabra clave (ej. 'nómina', 'equilibrio', 'Fayol', 'S.A.S.')..." 
+              class="w-full pl-9 pr-8 py-2 text-xs rounded-xl bg-slate-50 dark:bg-[#0c1322] border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:focus:ring-cyan-500/30 focus:border-blue-500 dark:focus:border-cyan-400 transition"
+            >
+            <button id="filter-clear-search-btn" onclick="window.app.clearSearchInput()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Counter + Flagged Filter + Reset -->
+          <div class="flex items-center gap-2 text-xs flex-wrap">
+            <span id="filter-results-text" class="text-slate-500 dark:text-slate-400 font-mono text-[11px]">
+              Mostrando 40 de 40 preguntas
+            </span>
+
+            <!-- Only Flagged Toggle -->
+            <button id="filter-flagged-btn" onclick="window.app.toggleOnlyFlagged()" class="px-3 py-1 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-amber-400 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-bookmark text-amber-500"></i>
+              <span>En Duda (<span id="flagged-count-badge">0</span>)</span>
+            </button>
+
+            <button onclick="window.app.resetAllFilters()" class="text-blue-600 dark:text-cyan-400 hover:underline font-medium text-xs flex items-center gap-1">
+              <i class="fa-solid fa-rotate-left"></i> Restablecer
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips: Difficulty + Competency -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs">
+          <!-- Dificultad -->
+          <div class="space-y-1.5">
+            <span class="text-slate-500 dark:text-slate-400 font-mono text-[11px] uppercase block font-semibold">
+              <i class="fa-solid fa-chart-simple text-blue-500 mr-1"></i> Filtrar por Dificultad:
+            </span>
+            <div id="difficulty-chips-group" class="flex items-center gap-1.5 flex-wrap">
+              <button data-diff="all" onclick="window.app.setDifficultyFilter('all')" class="diff-chip px-2.5 py-1 rounded-lg font-bold border transition text-white bg-blue-600 dark:bg-cyan-600 border-blue-600 dark:border-cyan-500 shadow-sm">
+                Todas
+              </button>
+              <button data-diff="Básica" onclick="window.app.setDifficultyFilter('Básica')" class="diff-chip px-2.5 py-1 rounded-lg font-medium border transition text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/80 hover:border-emerald-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1"></span> Básica (13)
+              </button>
+              <button data-diff="Media" onclick="window.app.setDifficultyFilter('Media')" class="diff-chip px-2.5 py-1 rounded-lg font-medium border transition text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/80 hover:border-amber-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block mr-1"></span> Media (17)
+              </button>
+              <button data-diff="Avanzada" onclick="window.app.setDifficultyFilter('Avanzada')" class="diff-chip px-2.5 py-1 rounded-lg font-medium border transition text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/80 hover:border-rose-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mr-1"></span> Avanzada (10)
+              </button>
+            </div>
+          </div>
+
+          <!-- Competencia -->
+          <div class="space-y-1.5">
+            <span class="text-slate-500 dark:text-slate-400 font-mono text-[11px] uppercase block font-semibold">
+              <i class="fa-solid fa-bullseye text-cyan-500 mr-1"></i> Competencia ICFES:
+            </span>
+            <div id="competencia-chips-group" class="flex items-center gap-1.5 flex-wrap">
+              <button data-comp="all" onclick="window.app.setCompetenciaFilter('all')" class="comp-chip px-2.5 py-1 rounded-lg font-bold border transition text-white bg-blue-600 dark:bg-cyan-600 border-blue-600 dark:border-cyan-500 shadow-sm">
+                Todas
+              </button>
+              <button data-comp="Interpretación" onclick="window.app.setCompetenciaFilter('Interpretación')" class="comp-chip px-2.5 py-1 rounded-lg font-medium border transition text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-[#0c1322] border-slate-200 dark:border-slate-700 hover:border-blue-400">
+                Interpretación
+              </button>
+              <button data-comp="Argumentación" onclick="window.app.setCompetenciaFilter('Argumentación')" class="comp-chip px-2.5 py-1 rounded-lg font-medium border transition text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-[#0c1322] border-slate-200 dark:border-slate-700 hover:border-blue-400">
+                Argumentación
+              </button>
+              <button data-comp="Solución" onclick="window.app.setCompetenciaFilter('Solución')" class="comp-chip px-2.5 py-1 rounded-lg font-medium border transition text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-[#0c1322] border-slate-200 dark:border-slate-700 hover:border-blue-400">
+                Solución Problemas
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single Question Focused View OR List Mode Nav -->
+      <div class="flex items-center justify-between bg-white dark:bg-[#131d33] px-4 py-2.5 rounded-xl border border-slate-200/90 dark:border-slate-800 text-xs shadow-xs transition-colors">
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-slate-700 dark:text-slate-300">Navegación:</span>
+          <button onclick="window.app.prevQuestion()" class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold border border-slate-300 dark:border-slate-700 transition">
+            <i class="fa-solid fa-chevron-left mr-1"></i> Anterior
+          </button>
+          <span id="nav-question-indicator" class="font-mono font-bold px-2 text-blue-700 dark:text-cyan-400 text-sm">Pregunta 1 de 40</span>
+          <button onclick="window.app.nextQuestion()" class="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold border border-slate-300 dark:border-slate-700 transition">
+            Siguiente <i class="fa-solid fa-chevron-right ml-1"></i>
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-1.5 cursor-pointer select-none text-slate-600 dark:text-slate-300">
+            <input type="checkbox" id="chk-show-all-questions" onchange="window.app.toggleViewMode()" class="rounded text-blue-600 focus:ring-blue-500">
+            <span>Ver listado completo</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Container where questions render dynamically -->
+      <div id="questions-container" class="space-y-6">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Bottom Nav between questions -->
+      <div id="bottom-pagination-bar" class="flex items-center justify-between bg-white dark:bg-[#131d33] p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm transition-colors">
+        <button onclick="window.app.prevQuestion()" class="flex items-center gap-2 px-4 py-2 rounded-xl text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-700 transition">
+          <i class="fa-solid fa-arrow-left"></i> Anterior
+        </button>
+        <div class="text-center">
+          <div class="text-xs text-slate-400 dark:text-slate-500 font-mono">Salto rápido</div>
+          <select id="select-jump-question" onchange="window.app.jumpToQuestion(parseInt(this.value))" class="text-sm font-semibold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1 bg-slate-50 dark:bg-[#0c1322] focus:outline-none focus:border-blue-500">
+            <!-- options generated by JS -->
+          </select>
+        </div>
+        <button onclick="window.app.nextQuestion()" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white font-semibold text-sm shadow-md shadow-blue-500/20 transition">
+          Siguiente <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </section>
+
+    <!-- RIGHT COLUMN: ICFES Optical Sheet (Hoja de Respuestas Óptica) + Quick Guide -->
+    <aside class="lg:col-span-4 flex flex-col gap-5 sticky top-24">
+
+      <!-- Official Optical Answer Sheet (Hoja de Respuestas) -->
+      <div class="bg-white dark:bg-[#131d33] rounded-2xl border border-slate-300/80 dark:border-slate-800 shadow-md p-5 relative overflow-hidden transition-colors">
+        <!-- Official Barcode Header -->
+        <div class="border-b border-dashed border-slate-300 dark:border-slate-700 pb-3 mb-4 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] font-mono tracking-widest text-slate-400 dark:text-slate-500 uppercase block font-bold">REPÚBLICA DE COLOMBIA</span>
+            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+              <i class="fa-regular fa-id-card text-blue-600 dark:text-cyan-400"></i> HOJA DE RESPUESTAS ÓPTICA
+            </h3>
+          </div>
+          <!-- Tech Barcode Simulation -->
+          <div class="flex flex-col items-end">
+            <div class="h-6 flex items-center gap-[2px] opacity-75">
+              <span class="w-[2px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[1px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[3px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[1px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[2px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[4px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[1px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+              <span class="w-[2px] h-6 bg-slate-900 dark:bg-cyan-400"></span>
+            </div>
+            <span class="text-[9px] font-mono text-slate-400 dark:text-slate-500">#ICFES-77491-CT</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-lg border border-amber-200/60 dark:border-amber-800/60 leading-tight">
+          <i class="fa-solid fa-circle-info text-amber-600 dark:text-amber-400 mr-1"></i> Rellene el óvalo completamente con su opción seleccionada (A, B, C o D).
+        </p>
+
+        <!-- Bubble Grid Container (Scrollable) -->
+        <div class="max-h-[380px] overflow-y-auto pr-1 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/60 dark:bg-[#0c1322] p-2.5">
+          <div id="optical-bubble-grid" class="grid grid-cols-1 gap-1.5 text-xs font-mono">
+            <!-- Generated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Sheet Footer Summary -->
+        <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+          <div class="text-slate-500 dark:text-slate-400 font-mono">
+            Marcadas: <span id="sheet-answered-count" class="font-bold text-blue-600 dark:text-cyan-400">0</span> / 40
+          </div>
+          <button onclick="window.app.resetExamAnswers()" class="text-slate-400 hover:text-red-600 font-medium transition text-[11px]">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Reiniciar
+          </button>
+        </div>
+
+        <!-- Mobile Calificar Button -->
+        <div class="mt-4 md:hidden">
+          <button onclick="window.app.openResultsModal()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs shadow-md">
+            <i class="fa-solid fa-check-double mr-1.5"></i> Calificar Examen
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Formulas & Concepts Card -->
+      <div class="bg-gradient-to-br from-slate-900 to-[#101b38] dark:from-[#0b1325] dark:to-[#070e1c] text-white rounded-2xl border border-cyan-900/50 p-4 shadow-sm text-xs">
+        <div class="flex items-center justify-between mb-2 pb-2 border-b border-slate-700/80 dark:border-slate-800">
+          <span class="font-bold text-cyan-300 flex items-center gap-1.5 font-mono">
+            <i class="fa-solid fa-calculator text-cyan-400"></i> FÓRMULAS CLAVE (BLOQUE 2)
+          </span>
+          <span class="text-[10px] font-mono text-slate-400">Guía Rápida</span>
+        </div>
+        <div class="space-y-2 font-mono text-[11px] text-slate-300">
+          <div class="bg-black/30 dark:bg-black/50 p-2 rounded-lg border border-slate-700/50 dark:border-slate-800">
+            <div class="text-slate-400 text-[10px]">Margen de Contribución:</div>
+            <div class="text-cyan-200 font-bold">MC = Precio Venta - Costo Var.</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">$10.000 - $3.800 = <span class="text-emerald-400">$6.200 COP</span></div>
+          </div>
+          <div class="bg-black/30 dark:bg-black/50 p-2 rounded-lg border border-slate-700/50 dark:border-slate-800">
+            <div class="text-slate-400 text-[10px]">Punto de Equilibrio (PE):</div>
+            <div class="text-cyan-200 font-bold">PE = Costos Fijos / MC Unitario</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">$7.800.000 / $6.200 ≈ <span class="text-emerald-400">1.259 unidades</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Keyboard Shortcuts Hint Card -->
+      <div class="bg-white dark:bg-[#131d33] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-3 text-[11px] text-slate-500 dark:text-slate-400 space-y-1">
+        <div class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 font-mono">
+          <i class="fa-regular fa-keyboard text-cyan-500"></i> ATAJOS DE TECLADO
+        </div>
+        <div class="grid grid-cols-2 gap-1 text-[10px]">
+          <div><kbd class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border font-mono">← / →</kbd> Anterior / Siguiente</div>
+          <div><kbd class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border font-mono">A B C D</kbd> Responder opción</div>
+          <div><kbd class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border font-mono">F</kbd> Marcar en duda</div>
+          <div><kbd class="px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border font-mono">ESC</kbd> Cerrar modal</div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- Modal de Calificación y Reporte Oficial Tipo ICFES -->
+  <div id="results-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-[#0f172a] rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transform transition-all animate-in fade-in duration-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-[#0b132b] dark:bg-[#060a12] text-white p-6 relative border-b border-cyan-900/40">
+        <button onclick="window.app.closeResultsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-lg transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+            <i class="fa-solid fa-award text-xl"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-mono tracking-widest text-cyan-300 uppercase block font-bold">INFORME INDIVIDUAL DE RESULTADOS</span>
+            <h3 class="text-xl font-extrabold text-white">Prueba Saber Pro / ICFES - Ciencia y Tecnología</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        <!-- Score Card -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-gradient-to-b from-blue-50 to-slate-50 dark:from-slate-800/60 dark:to-slate-900 p-4 rounded-2xl border border-blue-100 dark:border-slate-700 text-center">
+            <span class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase">Puntaje Global ICFES</span>
+            <div id="modal-icfes-score" class="text-4xl font-extrabold text-blue-700 dark:text-cyan-400 font-mono my-1">0 / 500</div>
+            <span id="modal-score-percentile" class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
+              Percentil 0
+            </span>
+          </div>
+          <div class="bg-gradient-to-b from-emerald-50 to-slate-50 dark:from-slate-800/60 dark:to-slate-900 p-4 rounded-2xl border border-emerald-100 dark:border-slate-700 text-center">
+            <span class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase">Aciertos Netos</span>
+            <div id="modal-correct-count" class="text-4xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono my-1">0 / 40</div>
+            <span id="modal-correct-pct" class="text-[11px] font-semibold text-slate-600 dark:text-slate-300">0% de efectividad</span>
+          </div>
+          <div class="bg-gradient-to-b from-rose-50 to-slate-50 dark:from-slate-800/60 dark:to-slate-900 p-4 rounded-2xl border border-rose-100 dark:border-slate-700 text-center">
+            <span class="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase">Errores / Sin marcar</span>
+            <div id="modal-wrong-count" class="text-4xl font-extrabold text-rose-600 dark:text-rose-400 font-mono my-1">40</div>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Oportunidades de mejora</span>
+          </div>
+        </div>
+
+        <!-- Breakdown by Blocks -->
+        <div>
+          <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2 font-mono">
+            Desempeño por Bloques Temáticos:
+          </h4>
+          <div id="modal-blocks-breakdown" class="space-y-2 text-xs">
+            <!-- Dynamic block progress bars -->
+          </div>
+        </div>
+
+        <!-- Feedback message -->
+        <div id="modal-feedback-box" class="p-4 rounded-xl bg-blue-50 dark:bg-cyan-950/40 border border-blue-200 dark:border-cyan-800/70 text-xs text-blue-900 dark:text-cyan-200 leading-relaxed">
+          <!-- Text feedback -->
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 dark:bg-slate-900/80 px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button onclick="window.app.reviewAllAnswersInStudyMode()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition shadow-sm">
+            <i class="fa-solid fa-graduation-cap"></i> Revisar Respuestas &amp; Justificaciones
+          </button>
+          <button onclick="window.app.printResultsReport()" class="px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs flex items-center gap-1.5 transition" title="Imprimir o guardar como PDF">
+            <i class="fa-solid fa-print"></i> Imprimir Reporte
+          </button>
+        </div>
+        <button onclick="window.app.closeResultsModal()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs transition">
+          Cerrar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 text-xs text-center">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-atom text-cyan-400"></i>
+        <span>Simulador ICFES TecnoEmpresarial • Ciencia y Tecnología</span>
+      </div>
+      <div>
+        Diseñado con fidelidad pedagógica oficial ICFES Saber Pro • Preparación 2025.2
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic (ES Module) -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

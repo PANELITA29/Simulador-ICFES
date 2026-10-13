@@ -1,0 +1,154 @@
+/* ==========================================================================
+   Simulador Saber • ICFES Tech - Custom Styles & Print Sheet
+   ========================================================================== */
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #0b1329;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Engineering Technical Canvas Grid Background */
+.grid-bg {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.22) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+.dark .grid-bg {
+  background-image: radial-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* ICFES Optical Bubblemark Elements */
+.bubble-opt {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.bubble-opt:hover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  transform: scale(1.08);
+}
+.dark .bubble-opt:hover {
+  border-color: #38bdf8;
+  background-color: #1e293b;
+  color: #38bdf8;
+  transform: scale(1.08);
+}
+
+.bubble-opt.selected {
+  background-color: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+  font-weight: 700;
+}
+.dark .bubble-opt.selected {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.55);
+  font-weight: 700;
+}
+
+.bubble-opt.correct-answer {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4) !important;
+}
+.dark .bubble-opt.correct-answer {
+  background-color: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5) !important;
+}
+
+.bubble-opt.wrong-answer {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4) !important;
+}
+.dark .bubble-opt.wrong-answer {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Flagged question pulse */
+.flagged-pulse {
+  animation: pulse-amber 2s infinite ease-in-out;
+}
+@keyframes pulse-amber {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+/* Confetti Canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Smooth Focus Ring */
+*:focus-visible {
+  outline: 2px solid #06b6d4;
+  outline-offset: 2px;
+}
+
+/* Print Friendly Styles for Official Certificate */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  header,
+  #filter-controls-panel,
+  #bottom-pagination-bar,
+  aside,
+  .no-print {
+    display: none !important;
+  }
+  #results-modal {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  #results-modal > div {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: 2px solid #000000 !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}

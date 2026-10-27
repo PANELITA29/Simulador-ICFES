@@ -35,6 +35,7 @@ if (state.currentQuestionIndex < 0 || state.currentQuestionIndex >= state.questi
 export function initApp() {
   initTheme();
   initSoundButton();
+  initPresentation();
   initEventListeners();
   populateJumpSelect();
   renderOpticalSheet();
@@ -76,6 +77,53 @@ function applyTheme(enableDark) {
     if (icon) icon.className = 'fa-solid fa-moon text-cyan-300 text-sm';
     if (text) text.textContent = 'Modo Noche';
   }
+}
+
+// -----------------------------------------------------------------------------
+// Presentation Video Management
+// -----------------------------------------------------------------------------
+function initPresentation() {
+  const section = document.getElementById('presentation-section');
+  const btnIcon = document.getElementById('presentation-btn-icon');
+  const btnText = document.getElementById('presentation-btn-text');
+  if (!section) return;
+
+  const savedState = localStorage.getItem('icfes_presentation_visible');
+  const isVisible = savedState !== 'false';
+
+  if (!isVisible) {
+    section.classList.add('hidden');
+    if (btnText) btnText.textContent = 'Presentación';
+    if (btnIcon) btnIcon.className = 'fa-solid fa-play text-[11px]';
+  } else {
+    section.classList.remove('hidden');
+    if (btnText) btnText.textContent = 'Ocultar Video';
+    if (btnIcon) btnIcon.className = 'fa-solid fa-eye-slash text-[11px]';
+  }
+}
+
+export function togglePresentation(forceState) {
+  const section = document.getElementById('presentation-section');
+  const btnIcon = document.getElementById('presentation-btn-icon');
+  const btnText = document.getElementById('presentation-btn-text');
+  if (!section) return;
+
+  const isHidden = section.classList.contains('hidden');
+  const shouldShow = typeof forceState === 'boolean' ? forceState : isHidden;
+
+  if (shouldShow) {
+    section.classList.remove('hidden');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (btnText) btnText.textContent = 'Ocultar Video';
+    if (btnIcon) btnIcon.className = 'fa-solid fa-eye-slash text-[11px]';
+    localStorage.setItem('icfes_presentation_visible', 'true');
+  } else {
+    section.classList.add('hidden');
+    if (btnText) btnText.textContent = 'Presentación';
+    if (btnIcon) btnIcon.className = 'fa-solid fa-play text-[11px]';
+    localStorage.setItem('icfes_presentation_visible', 'false');
+  }
+  sound.playTick();
 }
 
 // -----------------------------------------------------------------------------
@@ -921,6 +969,7 @@ function initKeyboardShortcuts() {
 function initEventListeners() {
   // Expose methods to global window for HTML inline onclick handlers
   window.app = {
+    togglePresentation,
     toggleTheme,
     toggleSound,
     toggleTimerPause,
